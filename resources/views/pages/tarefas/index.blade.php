@@ -11,8 +11,24 @@
                 <div class="p-6 text-gray-900">
 
                     <div class="flex items-center justify-between mb-6">
-                        <h3 class="text-lg font-medium text-gray-900">Listagem de Tarefas</h3>
-                        <a href="{{ route('tarefas.create') }}" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">Cadastrar Tarefa</a>
+                        <div class="flex items-center space-x-4">
+                            <h3 class="text-lg font-medium text-gray-900">Listagem de Tarefas</h3>
+                        </div>
+
+                        <div class="flex items-center space-x-4">
+                            <form method="GET" action="{{ route('tarefas.index') }}" class="inline-flex items-center">
+                                <label for="status" class="sr-only">Filtrar por status</label>
+                                <select name="status" id="status" onchange="this.form.submit()" class="rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
+                                    <option value="" {{ empty($currentStatus) ? 'selected' : '' }}>Todas</option>
+                                    <option value="pendente" {{ ($currentStatus ?? request('status')) === 'pendente' ? 'selected' : '' }}>Pendentes</option>
+                                    <option value="concluida" {{ ($currentStatus ?? request('status')) === 'concluida' ? 'selected' : '' }}>Concluídas</option>
+                                </select>
+                            </form>
+
+                            <a href="{{ route('tarefas.create') }}" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                Cadastrar Tarefa
+                            </a>
+                        </div>
                     </div>
 
                     <div class="overflow-x-auto">
@@ -48,6 +64,7 @@
                                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                             <form method="POST" action="{{ route('tarefas.concluir', $tarefa) }}" class="inline">
                                                 @csrf
+                                                <input type="hidden" name="status" value="{{ $currentStatus ?? request('status') }}">
                                                 <button
                                                     type="submit"
                                                     class="{{ $tarefa->concluida ? 'text-green-600 hover:text-green-900'

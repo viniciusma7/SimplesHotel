@@ -11,11 +11,24 @@ class TarefasController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $tarefas = Tarefa::all()->sortBy('id', SORT_ASC);
+        $status = $request->query('status');
 
-        return view('pages.tarefas.index', ['tarefas' => $tarefas]);
+        $query = Tarefa::query();
+
+        if ($status === 'concluida') {
+            $query->where('concluida', true);
+        } elseif ($status === 'pendente') {
+            $query->where('concluida', false);
+        }
+
+        $tarefas = $query->orderBy('id', 'asc')->get();
+
+        return view('pages.tarefas.index', [
+            'tarefas' => $tarefas,
+            'currentStatus' => $status,
+        ]);
     }
 
     /**
@@ -42,10 +55,15 @@ class TarefasController extends Controller
     /**
      * Mark the task as completed.
      */
-    public function concluir(Tarefa $tarefa)
+    public function concluir(Request $request, Tarefa $tarefa)
     {
         $tarefa->concluida = !$tarefa->concluida;
         $tarefa->save();
+
+        $status = $request->input('status');
+        if (!empty($status)) {
+            return redirect()->route('tarefas.index', ['status' => $status]);
+        }
 
         return redirect()->route('tarefas.index');
     }
