@@ -13,6 +13,9 @@
 
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
+        <!-- Toastify CSS/JS (CDN) -->
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+        <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     </head>
     <body class="font-sans antialiased">
         <div class="min-h-screen bg-gray-100">
@@ -32,5 +35,33 @@
                 {{ $slot }}
             </main>
         </div>
+        {{-- Toastify flashes --}}
+        <script>
+            (function() {
+                const opts = (text, type = 'success') => ({
+                    text: text,
+                    duration: 4000,
+                    close: true,
+                    gravity: 'top',
+                    position: 'right',
+                    stopOnFocus: true,
+                    style: {
+                        background: type === 'success' ? 'linear-gradient(to right, #34D399, #10B981)' : 'linear-gradient(to right, #F87171, #EF4444)'
+                    }
+                });
+
+                @if(session('success'))
+                    Toastify(opts(@json(session('success')), 'success')).showToast();
+                @endif
+
+                @if(session('error'))
+                    Toastify(opts(@json(session('error')), 'error')).showToast();
+                @endif
+
+                @if(session('info'))
+                    Toastify(opts(@json(session('info')), 'success')).showToast();
+                @endif
+            })();
+        </script>
     </body>
 </html>

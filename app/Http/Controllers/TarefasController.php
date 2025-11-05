@@ -52,7 +52,7 @@ class TarefasController extends Controller
     {
         $task = $this->repository->createForUser($request->all(), Auth::id());
 
-        return redirect()->route('tarefas.edit', $task);
+        return redirect()->route('tarefas.edit', $task)->with('success', 'Tarefa criada com sucesso.');
     }
 
     /**
@@ -60,14 +60,16 @@ class TarefasController extends Controller
      */
     public function concluir(Request $request, Tarefa $tarefa)
     {
-        $this->repository->toggleStatus($tarefa);
+        $tarefa = $this->repository->toggleStatus($tarefa);
+
+        $message = $tarefa->status === 'concluida' ? 'Tarefa marcada como concluída.' : 'Tarefa reaberta.';
 
         $status = $request->input('status');
         if (! empty($status)) {
-            return redirect()->route('tarefas.index', ['status' => $status]);
+            return redirect()->route('tarefas.index', ['status' => $status])->with('success', $message);
         }
 
-        return redirect()->route('tarefas.index');
+        return redirect()->route('tarefas.index')->with('success', $message);
     }
 
     /**
@@ -84,8 +86,7 @@ class TarefasController extends Controller
     public function update(TarefaRequest $request, Tarefa $tarefa)
     {
         $this->repository->update($tarefa, $request->all());
-
-        return redirect()->route('tarefas.edit', $tarefa);
+        return redirect()->route('tarefas.edit', $tarefa)->with('success', 'Tarefa atualizada com sucesso.');
     }
 
     /**
@@ -94,8 +95,7 @@ class TarefasController extends Controller
     public function destroy(Tarefa $tarefa)
     {
         $this->repository->delete($tarefa);
-
-        return redirect()->route('tarefas.index');
+        return redirect()->route('tarefas.index')->with('success', 'Tarefa excluída com sucesso.');
     }
 
     /**
@@ -103,8 +103,12 @@ class TarefasController extends Controller
      */
     public function restore($id)
     {
-        $this->repository->restoreByIdForUser($id, auth()->id());
+        $restored = $this->repository->restoreByIdForUser($id, auth()->id());
 
-        return redirect()->route('tarefas.index');
+        if ($restored) {
+            return redirect()->route('tarefas.index')->with('success', 'Tarefa restaurada com sucesso.');
+        }
+
+        return redirect()->route('tarefas.index')->with('error', 'Tarefa não encontrada ou não pôde ser restaurada.');
     }
 }
