@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\TarefaRequest;
 use App\Models\Tarefa;
 use Illuminate\Http\Request;
 
@@ -12,7 +13,7 @@ class TarefasController extends Controller
      */
     public function index()
     {
-        $tarefas = Tarefa::all();
+        $tarefas = Tarefa::all()->sortBy('id', SORT_ASC);
 
         return view('pages.tarefas.index', ['tarefas' => $tarefas]);
     }
@@ -28,17 +29,25 @@ class TarefasController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(TarefaRequest $request)
     {
-        dd($request->all());
+        $data = $request->all();
+        $data['concluida'] = $request->has('concluida') ? $request->boolean('concluida') : false;
+
+        $task = Tarefa::create($data);
+
+        return redirect()->route('tarefas.edit', $task);
     }
 
     /**
-     * Display the specified resource.
+     * Mark the task as completed.
      */
-    public function show(Tarefa $tarefa)
+    public function concluir(Tarefa $tarefa)
     {
-        //
+        $tarefa->concluida = !$tarefa->concluida;
+        $tarefa->save();
+
+        return redirect()->route('tarefas.index');
     }
 
     /**
@@ -52,9 +61,14 @@ class TarefasController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Tarefa $tarefa)
+    public function update(TarefaRequest $request, Tarefa $tarefa)
     {
-        //
+        $data = $request->all();
+        $data['concluida'] = $request->has('concluida') ? $request->boolean('concluida') : false;
+
+        $tarefa->update($data);
+
+        return redirect()->route('tarefas.edit', $tarefa);
     }
 
     /**
@@ -62,6 +76,8 @@ class TarefasController extends Controller
      */
     public function destroy(Tarefa $tarefa)
     {
-        //
+        $tarefa->delete();
+
+        return redirect()->route('tarefas.index');
     }
 }
