@@ -22,7 +22,7 @@ class TarefasController extends Controller
      */
     public function create()
     {
-        //
+        return view('pages.tarefas.create');
     }
 
     /**
@@ -30,7 +30,7 @@ class TarefasController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        dd($request->all());
     }
 
     /**
@@ -46,7 +46,7 @@ class TarefasController extends Controller
      */
     public function edit(Tarefa $tarefa)
     {
-        //
+        return view('pages.tarefas.edit', ['tarefa' => $tarefa]);
     }
 
     /**
