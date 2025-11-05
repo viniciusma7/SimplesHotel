@@ -89,6 +89,9 @@
                         </table>
                     </div>
 
+                    <div class="mt-6">
+                        {{ $tarefas->appends(request()->query())->links('pagination::tailwind') }}
+                    </div>
                 </div>
             </div>
         </div>

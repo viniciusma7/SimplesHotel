@@ -23,7 +23,7 @@ class TarefasController extends Controller
             $query->where('concluida', false);
         }
 
-        $tarefas = $query->orderBy('id', 'asc')->get();
+        $tarefas = $query->orderBy('id', 'asc')->paginate(15)->withQueryString();
 
         return view('pages.tarefas.index', [
             'tarefas' => $tarefas,
