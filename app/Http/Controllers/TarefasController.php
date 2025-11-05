@@ -6,9 +6,16 @@ use App\Http\Requests\TarefaRequest;
 use App\Models\Tarefa;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Repositories\TarefaRepositoryInterface;
 
 class TarefasController extends Controller
 {
+    private TarefaRepositoryInterface $repository;
+
+    public function __construct(TarefaRepositoryInterface $repository)
+    {
+        $this->repository = $repository;
+    }
     /**
      * Display a listing of the resource.
      */
@@ -18,16 +25,10 @@ class TarefasController extends Controller
         $excluidos = $request->query('excluidos');
 
         if ($excluidos) {
-            $query = Tarefa::onlyTrashed()->where('user_id', auth()->id());
+            $tarefas = $this->repository->paginateTrashedByUser(auth()->id(), 15)->withQueryString();
         } else {
-            $query = Tarefa::query()->where('user_id', auth()->id());
-
-            if ($status) {
-                $query->where('status', $status);
-            }
+            $tarefas = $this->repository->paginateByUser(auth()->id(), $status, 15)->withQueryString();
         }
-
-        $tarefas = $query->orderBy('id', 'asc')->paginate(15)->withQueryString();
 
         return view('pages.tarefas.index', [
             'tarefas' => $tarefas,
@@ -49,10 +50,7 @@ class TarefasController extends Controller
      */
     public function store(TarefaRequest $request)
     {
-        $task = Tarefa::create(array_merge(
-            $request->all(),
-            ['user_id' => Auth::id()]
-        ));
+        $task = $this->repository->createForUser($request->all(), Auth::id());
 
         return redirect()->route('tarefas.edit', $task);
     }
@@ -62,8 +60,7 @@ class TarefasController extends Controller
      */
     public function concluir(Request $request, Tarefa $tarefa)
     {
-        $tarefa->status = $tarefa->status == 'pendente' ? 'concluida' : 'pendente';
-        $tarefa->save();
+        $this->repository->toggleStatus($tarefa);
 
         $status = $request->input('status');
         if (! empty($status)) {
@@ -86,7 +83,7 @@ class TarefasController extends Controller
      */
     public function update(TarefaRequest $request, Tarefa $tarefa)
     {
-        $tarefa->update($request->all());
+        $this->repository->update($tarefa, $request->all());
 
         return redirect()->route('tarefas.edit', $tarefa);
     }
@@ -96,7 +93,7 @@ class TarefasController extends Controller
      */
     public function destroy(Tarefa $tarefa)
     {
-        $tarefa->delete();
+        $this->repository->delete($tarefa);
 
         return redirect()->route('tarefas.index');
     }
@@ -106,8 +103,7 @@ class TarefasController extends Controller
      */
     public function restore($id)
     {
-        $tarefa = Tarefa::withTrashed()->where('id', $id)->where('user_id', auth()->id())->firstOrFail();
-        $tarefa->restore();
+        $this->repository->restoreByIdForUser($id, auth()->id());
 
         return redirect()->route('tarefas.index');
     }
