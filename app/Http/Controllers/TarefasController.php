@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\TarefaRequest;
 use App\Models\Tarefa;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class TarefasController extends Controller
 {
@@ -15,12 +16,10 @@ class TarefasController extends Controller
     {
         $status = $request->query('status');
 
-        $query = Tarefa::query();
+        $query = Tarefa::query()->where('user_id', auth()->id());
 
-        if ($status === 'concluida') {
-            $query->where('concluida', true);
-        } elseif ($status === 'pendente') {
-            $query->where('concluida', false);
+        if ($status) {
+            $query->where('status', $status);
         }
 
         $tarefas = $query->orderBy('id', 'asc')->paginate(15)->withQueryString();
@@ -44,10 +43,10 @@ class TarefasController extends Controller
      */
     public function store(TarefaRequest $request)
     {
-        $data = $request->all();
-        $data['concluida'] = $request->has('concluida') ? $request->boolean('concluida') : false;
-
-        $task = Tarefa::create($data);
+        $task = Tarefa::create(array_merge(
+            $request->all(),
+            ['user_id' => Auth::id()]
+        ));
 
         return redirect()->route('tarefas.edit', $task);
     }
@@ -57,11 +56,11 @@ class TarefasController extends Controller
      */
     public function concluir(Request $request, Tarefa $tarefa)
     {
-        $tarefa->concluida = !$tarefa->concluida;
+        $tarefa->status = $tarefa->status == 'pendente' ? 'concluida' : 'pendente';
         $tarefa->save();
 
         $status = $request->input('status');
-        if (!empty($status)) {
+        if (! empty($status)) {
             return redirect()->route('tarefas.index', ['status' => $status]);
         }
 
@@ -81,10 +80,7 @@ class TarefasController extends Controller
      */
     public function update(TarefaRequest $request, Tarefa $tarefa)
     {
-        $data = $request->all();
-        $data['concluida'] = $request->has('concluida') ? $request->boolean('concluida') : false;
-
-        $tarefa->update($data);
+        $tarefa->update($request->all());
 
         return redirect()->route('tarefas.edit', $tarefa);
     }

@@ -24,7 +24,7 @@ class TarefaRequest extends FormRequest
         return [
             'titulo' => 'required|string|max:255',
             'descricao' => 'nullable|string',
-            'concluida' => 'sometimes|boolean',
+            'status' => 'required|in:pendente,concluida',
         ];
     }
 
@@ -35,7 +35,8 @@ class TarefaRequest extends FormRequest
             'titulo.string' => 'O campo título deve ser uma string.',
             'titulo.max' => 'O campo título não pode exceder 255 caracteres.',
             'descricao.string' => 'O campo descrição deve ser uma string.',
-            'concluida.boolean' => 'O campo concluída deve ser verdadeiro ou falso.',
+            'status.required' => 'O campo status é obrigatório.',
+            'status.in' => 'O campo status deve ser "pendente" ou "concluida".',
         ];
     }
 }

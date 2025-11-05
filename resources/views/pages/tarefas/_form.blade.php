@@ -19,19 +19,15 @@
     </div>
 
     <div>
-        <label class="inline-flex items-center cursor-pointer">
-            <input type="checkbox" name="concluida" value="1" class="sr-only peer" @checked(old('concluida', $tarefa->concluida ?? false))>
-            <div
-                class="relative w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4
-                peer-focus:ring-blue-300 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full
-                peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white
-                after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600">
-            </div>
-            <span class="ms-3 text-sm font-medium text-gray-900">Concluído?</span>
-        </label>
-        @error('concluida')
+        <label for="status" class="block text-sm font-medium text-gray-700">Status</label>
+        <select name="status" id="status" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+            <option value="pendente" {{ old('status', $tarefa->status ?? '') === 'pendente' ? 'selected' : '' }}>Pendente</option>
+            <option value="concluida" {{ old('status', $tarefa->status ?? '') === 'concluida' ? 'selected' : '' }}>Concluída</option>
+        </select>
+        @error('status')
             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
         @enderror
+    </div>
 
         <div class="flex justify-end">
             <button type="submit"

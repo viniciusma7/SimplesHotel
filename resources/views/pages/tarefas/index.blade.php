@@ -50,15 +50,11 @@
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $tarefa->titulo }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ substr($tarefa->descricao, 0, 25) }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $tarefa->created_at->format('d/m/Y') }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
-                                            @if ($tarefa->concluida)
-                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 text-green-500 inline-block">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                                                </svg>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-center">
+                                            @if($tarefa->status == 'concluida')
+                                                <span class="inline-flex items-center px-3 py-1 text-xs font-semibold text-green-800 bg-green-100 rounded-full">Concluída</span>
                                             @else
-                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 text-red-500 inline-block">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                                                </svg>
+                                                <span class="inline-flex items-center px-3 py-1 text-xs font-semibold text-yellow-800 bg-yellow-100 rounded-full">Pendente</span>
                                             @endif
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -67,13 +63,13 @@
                                                 <input type="hidden" name="status" value="{{ $currentStatus ?? request('status') }}">
                                                 <button
                                                     type="submit"
-                                                    class="{{ $tarefa->concluida ? 'text-green-600 hover:text-green-900'
+                                                    class="{{ $tarefa->status == 'pendente' ? 'text-green-600 hover:text-green-900'
                                                     : 'text-red-500 hover:text-red-900' }} mr-3">
-                                                    {{ !$tarefa->concluida ? 'Concluir Tarefa' : 'Reabrir Tarefa' }}
+                                                    {{ $tarefa->status == 'pendente' ? 'Concluir Tarefa' : 'Reabrir Tarefa' }}
                                                 </button>
                                             </form>
                                             <a href="{{ route('tarefas.edit', $tarefa) }}" class="text-yellow-600 hover:text-yellow-900 mr-3">Editar</a>
-                                            <form action="{{ route('tarefas.destroy', $tarefa) }}" method="POST" class="inline-block" onsubmit="return confirm('Confirma exclusão?')">
+                                            <form action="{{ route('tarefas.destroy', $tarefa) }}" method="POST" class="inline-block" onsubmit="return confirm('Confirmar exclusão?')">
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit" class="text-red-600 hover:text-red-900">Excluir</button>
