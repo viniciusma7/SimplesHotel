@@ -15,11 +15,16 @@ class TarefasController extends Controller
     public function index(Request $request)
     {
         $status = $request->query('status');
+        $excluidos = $request->query('excluidos');
 
-        $query = Tarefa::query()->where('user_id', auth()->id());
+        if ($excluidos) {
+            $query = Tarefa::onlyTrashed()->where('user_id', auth()->id());
+        } else {
+            $query = Tarefa::query()->where('user_id', auth()->id());
 
-        if ($status) {
-            $query->where('status', $status);
+            if ($status) {
+                $query->where('status', $status);
+            }
         }
 
         $tarefas = $query->orderBy('id', 'asc')->paginate(15)->withQueryString();
@@ -27,6 +32,7 @@ class TarefasController extends Controller
         return view('pages.tarefas.index', [
             'tarefas' => $tarefas,
             'currentStatus' => $status,
+            'excluidos' => $excluidos,
         ]);
     }
 
@@ -91,6 +97,17 @@ class TarefasController extends Controller
     public function destroy(Tarefa $tarefa)
     {
         $tarefa->delete();
+
+        return redirect()->route('tarefas.index');
+    }
+
+    /**
+     * Restore a soft-deleted tarefa.
+     */
+    public function restore($id)
+    {
+        $tarefa = Tarefa::withTrashed()->where('id', $id)->where('user_id', auth()->id())->firstOrFail();
+        $tarefa->restore();
 
         return redirect()->route('tarefas.index');
     }

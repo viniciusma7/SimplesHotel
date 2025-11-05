@@ -18,6 +18,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     Route::resource('/tarefas', TarefasController::class)->except(['show']);
     Route::post('/tarefas/{tarefa}/concluir', [TarefasController::class, 'concluir'])->name('tarefas.concluir');
+    Route::post('/tarefas/{id}/restore', [TarefasController::class, 'restore'])->name('tarefas.restore');
 });
 
 require __DIR__.'/auth.php';

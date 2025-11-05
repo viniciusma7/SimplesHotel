@@ -25,6 +25,16 @@
                                 </select>
                             </form>
 
+                            @if(empty($excluidos))
+                                <a href="{{ route('tarefas.index', array_merge(request()->query(), ['excluidos' => 1])) }}" class="inline-flex items-center px-4 py-2 bg-gray-200 text-gray-800 text-sm font-medium rounded-md shadow-sm hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-300">
+                                    Ver excluídas
+                                </a>
+                            @else
+                                <a href="{{ route('tarefas.index') }}" class="inline-flex items-center px-4 py-2 bg-gray-200 text-gray-800 text-sm font-medium rounded-md shadow-sm hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-300">
+                                    Voltar
+                                </a>
+                            @endif
+
                             <a href="{{ route('tarefas.create') }}" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                                 Cadastrar Tarefa
                             </a>
@@ -58,22 +68,29 @@
                                             @endif
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                            <form method="POST" action="{{ route('tarefas.concluir', $tarefa) }}" class="inline">
-                                                @csrf
-                                                <input type="hidden" name="status" value="{{ $currentStatus ?? request('status') }}">
-                                                <button
-                                                    type="submit"
-                                                    class="{{ $tarefa->status == 'pendente' ? 'text-green-600 hover:text-green-900'
-                                                    : 'text-red-500 hover:text-red-900' }} mr-3">
-                                                    {{ $tarefa->status == 'pendente' ? 'Concluir Tarefa' : 'Reabrir Tarefa' }}
-                                                </button>
-                                            </form>
-                                            <a href="{{ route('tarefas.edit', $tarefa) }}" class="text-yellow-600 hover:text-yellow-900 mr-3">Editar</a>
-                                            <form action="{{ route('tarefas.destroy', $tarefa) }}" method="POST" class="inline-block" onsubmit="return confirm('Confirmar exclusão?')">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="text-red-600 hover:text-red-900">Excluir</button>
-                                            </form>
+                                            @unless(!empty($excluidos))
+                                                <form method="POST" action="{{ route('tarefas.concluir', $tarefa) }}" class="inline">
+                                                    @csrf
+                                                    <input type="hidden" name="status" value="{{ $currentStatus ?? request('status') }}">
+                                                    <button
+                                                        type="submit"
+                                                        class="{{ $tarefa->status == 'pendente' ? 'text-green-600 hover:text-green-900'
+                                                        : 'text-red-500 hover:text-red-900' }} mr-3">
+                                                        {{ $tarefa->status == 'pendente' ? 'Concluir Tarefa' : 'Reabrir Tarefa' }}
+                                                    </button>
+                                                </form>
+                                                <a href="{{ route('tarefas.edit', $tarefa) }}" class="text-yellow-600 hover:text-yellow-900 mr-3">Editar</a>
+                                                <form action="{{ route('tarefas.destroy', $tarefa) }}" method="POST" class="inline-block" onsubmit="return confirm('Confirmar exclusão?')">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="text-red-600 hover:text-red-900">Excluir</button>
+                                                </form>
+                                            @else
+                                                <form action="{{ route('tarefas.restore', $tarefa->id) }}" method="POST" class="inline-block">
+                                                    @csrf
+                                                    <button type="submit" class="text-green-600 hover:text-green-900 mr-3">Restaurar</button>
+                                                </form>
+                                            @endunless
                                         </td>
                                     </tr>
                                 @empty
